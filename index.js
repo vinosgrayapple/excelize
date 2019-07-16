@@ -1,24 +1,34 @@
-var excelbuilder = require('msexcel-builder');
+const excel = require('excel4node');
 
-function excelize(obj, path, file, sheet, cb){
-    var titles = Object.keys(obj[0]);
-    var width = titles.length;
-    var height = obj.length;
-    var workbook = excelbuilder.createWorkbook(path, file);
-    var sht = workbook.createSheet(sheet, width, height+1);
-    var i, j, k;
+function excelize(obj, path, file, sheet, cb) {
+    const titles = Object.keys(obj[0]);
+    const width = titles.length;
+    const height = obj.length;
+    // const workbook = excelbuilder.createWorkbook(path, file);
+    const workbook = new excel.Workbook();
+    // const sht = workbook.createSheet(sheet, width, height + 1);
+    const sht = workbook.addWorksheet(sheet);
+    const style = workbook.createStyle({
+        font: {
+            bold: true,
+            color: 'ffFF00',
+            size: 14
+        },
+        // numberFormat: '$#,##0.00; ($#,##0.00); -',
+    });
+    let col, j, k;
 
-    for (i = 1; i <= width; i++){
-        sht.set(i, 1, titles[i-1]);
-        sht.font(i, 1, {bold:'true'});
+    for (col = 1; col <= width; col++) {
+        sht.cell(1, col).string(titles[col - 1]).style(style);
     }
     for (j = 1; j <= height; j++) {
-        for (i = 1; i <= width; i++){
-            k = titles[i-1];
-            sht.set(i, j+1, obj[j-1][k]);
+        for (col = 1; col <= width; col++) {
+            k = titles[col - 1];
+            sht.cell(j + 1, col).string(obj[j - 1][k])
         }
     }
-    workbook.save(cb);
+    workbook.write(file);
+    cb()
 }
 
 module.exports = excelize;
